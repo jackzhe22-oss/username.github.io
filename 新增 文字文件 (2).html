@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北埔國小分組作業三折頁</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap');
+
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: #fff3e0; /* 溫馨的橘黃色背景 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #d84315;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        button {
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-fold { background-color: #ff7043; color: #fff; }
+        .btn-fold:hover { background-color: #ff8a65; box-shadow: 0 4px 10px rgba(255, 112, 67, 0.4); }
+
+        .btn-flip { background-color: #26a69a; color: #fff; }
+        .btn-flip:hover { background-color: #4db6ac; box-shadow: 0 4px 10px rgba(38, 166, 154, 0.4); }
+
+        .scene {
+            width: 900px;
+            height: 600px;
+            perspective: 2000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .paper-container {
+            position: relative;
+            width: 891px;
+            height: 450px;
+            transform-style: preserve-3d;
+            transition: transform 1s ease-in-out;
+            display: flex;
+        }
+
+        .panel {
+            height: 100%;
+            position: absolute;
+            top: 0;
+            transform-style: preserve-3d;
+            transform-origin: left center;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            border-right: 1px dashed #ccc;
+        }
+        
+        .panel:last-child { border-right: none; }
+
+        .panel svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #panel-left { width: 291px; left: 0; transform-origin: right center; z-index: 1; }
+        #panel-center { width: 300px; left: 291px; z-index: 0; }
+        #panel-right { width: 300px; left: 591px; transform-origin: left center; z-index: 2; }
+
+        body.is-folded #panel-left { transform: rotateY(178deg); }
+        body.is-folded #panel-right { transform: rotateY(-179deg); transition-delay: 0.3s; }
+        
+        .shadow-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; opacity: 0; transition: opacity 1s; pointer-events: none;
+        }
+        body.is-folded #panel-left .shadow-overlay { opacity: 0.1; }
+        body.is-folded #panel-center .shadow-overlay { opacity: 0.2; }
+
+        body.is-flipped .paper-container { transform: rotateX(180deg); }
+        
+        .face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .face.front { z-index: 2; }
+        .face.back { transform: rotateX(180deg); z-index: 1; }
+
+        .info-text {
+            margin-top: -30px;
+            font-size: 1.2rem;
+            color: #d84315;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 25px;
+            border-radius: 15px;
+            pointer-events: none;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .photo-placeholder {
+            fill: #f5f5f5; stroke: #ccc; stroke-width: 2; stroke-dasharray: 5,5;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📝 北埔國小：分組作業三折頁模擬器</h1>
+    
+    <div class="controls">
+        <button class="btn-fold" onclick="toggleFold()">
+            <span id="fold-icon">📂</span> <span id="fold-text">折起來檢查！</span>
+        </button>
+        <button class="btn-flip" onclick="toggleFlip()">
+            <span>🔄</span> 翻到裡面寫內容 (Inside)
+        </button>
+    </div>
+
+    <div class="scene">
+        <div class="paper-container">
+            
+            <div class="panel" id="panel-left">
+                <div class="face front" style="background: #fff8e1;">
+                    <svg viewBox="0 0 291 450">
+                        <text x="145" y="180" text-anchor="middle" font-size="22" fill="#f57f17" font-weight="bold">這是驚喜頁！</text>
+                        <text x="145" y="220" text-anchor="middle" font-size="16" fill="#555">打開封面後，</text>
+                        <text x="145" y="245" text-anchor="middle" font-size="16" fill="#555">會先看到這一頁。</text>
+                        <text x="145" y="270" text-anchor="middle" font-size="16" fill="#555">可以寫「引言」或「目錄」。</text>
+                        <circle cx="145" cy="330" r="30" fill="#ffecb3" />
+                        <text x="145" y="338" text-anchor="middle" font-size="24">👀</text>
+                        <text x="145" y="400" text-anchor="middle" font-size="12" fill="#e65100">注意：這頁寬度比較窄 (97mm)</text>
+                    </svg>
+                    <div class="shadow-overlay"></div>
+                </div>
+                <div class="face back" style="background: #e0f2f1;">
+                    <svg viewBox="0 0 291 450">
+                        <rect x="20" y="20" width="251" height="50" fill="#00897b" rx="25"/>
+                        <text x="145" y="53" text-anchor="middle" font-size="20" fill="white" font-weight="bold">特色三：快樂操場</text>
+                        <rect x="35" y="90" width="221" height="150" class="photo-placeholder" rx="5"/>
+                        <text x="145" y="170" text-anchor="middle" font-size="30">⚽️</text>
+                        <text x="145" y="270" text-anchor="middle" font-size="15" fill="#555">下課時我們都在這跑步，</text>
+                        <text x="145" y="295" text-anchor="middle" font-size="15" fill="#555">真的超好玩！</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="panel" id="panel-center">
+                <div class="face front" style="background: #dcedc8;">
+                    <svg viewBox="0 0 300 450">
+                        <rect x="30" y="60" width="240" height="220" fill="white" stroke="#558b2f" stroke-width="2" rx="10"/>
+                        
+                        <text x="150" y="100" text-anchor="middle" font-size="22" fill="#33691e" font-weight="bold">👥 小小設計師</text>
+                        
+                        <text x="60" y="140" font-size="18" fill="#558b2f" font-weight="bold">組別：</text>
+                        <text x="120" y="140" font-size="18" fill="#333">第 ____ 組</text>
+                        
+                        <text x="60" y="180" font-size="18" fill="#558b2f" font-weight="bold">組員：</text>
+                        <text x="80" y="215" font-size="16" fill="#333">1. __________</text>
+                        <text x="80" y="245" font-size="16" fill="#333">2. __________</text>
+                        <text x="80" y="275" font-size="16" fill="#333">3. __________</text>
+
+                        <text x="150" y="330" text-anchor="middle" font-size="20" fill="#33691e" font-weight="bold">🙏 感謝語</text>
+                        <text x="150" y="360" text-anchor="middle" font-size="15" fill="#555">謝謝老師指導我們，</text>
+                        <text x="150" y="385" text-anchor="middle" font-size="15" fill="#555">讓我們認識了北埔國小！</text>
+                        
+                        <text x="150" y="420" text-anchor="middle" font-size="12" fill="#558b2f">(這是封底，折起來在背面)</text>
+                    </svg>
+                    <div class="shadow-overlay"></div>
+                </div>
+                <div class="face back" style="background: #b2dfdb;">
+                    <svg viewBox="0 0 300 450">
+                        <rect x="25" y="20" width="250" height="50" fill="#00897b" rx="25"/>
+                        <text x="150" y="53" text-anchor="middle" font-size="20" fill="white" font-weight="bold">特色二：圖書城堡</text>
+                        <rect x="40" y="90" width="220" height="150" class="photo-placeholder" rx="5"/>
+                        <text x="150" y="170" text-anchor="middle" font-size="30">📚</text>
+                        <text x="150" y="270" text-anchor="middle" font-size="15" fill="#555">有很多好看的書，</text>
+                        <text x="150" y="295" text-anchor="middle" font-size="15" fill="#555">大家要安靜閱讀喔。</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="panel" id="panel-right">
+                <div class="face front" style="background: #ffccbc;">
+                    <svg viewBox="0 0 300 450">
+                        <text x="150" y="40" text-anchor="middle" font-size="14" fill="#d84315" font-weight="bold">★ 折起來後，我就是第一頁！ ★</text>
+
+                        <text x="150" y="80" text-anchor="middle" font-size="26" fill="#bf360c" font-weight="bold">✨ 一起來認識</text>
+                        <text x="150" y="120" text-anchor="middle" font-size="32" fill="#bf360c" font-weight="bold">北埔國小</text>
+                        
+                        <rect x="25" y="150" width="250" height="180" fill="white" stroke="#bf360c" stroke-width="3" rx="10"/>
+                        <rect x="35" y="160" width="110" height="160" fill="#a5d6a7" rx="5"/>
+                        <text x="90" y="240" text-anchor="middle" font-size="40">🌲</text>
+                        <rect x="155" y="160" width="110" height="160" fill="#90caf9" rx="5"/>
+                        <text x="210" y="240" text-anchor="middle" font-size="40">🏫</text>
+                        
+                        <text x="150" y="370" text-anchor="middle" font-size="18" fill="#d84315" font-weight="bold">這是我們的校園美景</text>
+                        <text x="150" y="430" text-anchor="middle" font-size="12" fill="#d84315">排版位置：最右邊 (100mm)</text>
+                    </svg>
+                </div>
+                <div class="face back" style="background: #e0f2f1;">
+                    <svg viewBox="0 0 300 450">
+                        <rect x="25" y="20" width="250" height="50" fill="#00897b" rx="25"/>
+                        <text x="150" y="53" text-anchor="middle" font-size="20" fill="white" font-weight="bold">特色一：百年老樹</text>
+                        <rect x="40" y="90" width="220" height="150" class="photo-placeholder" rx="5"/>
+                        <text x="150" y="170" text-anchor="middle" font-size="30">🌳</text>
+                        <text x="150" y="270" text-anchor="middle" font-size="15" fill="#555">一進校門就看到的大樹，</text>
+                        <text x="150" y="295" text-anchor="middle" font-size="15" fill="#555">像爺爺一樣保護我們。</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-text" id="status-text">
+        現在是：攤開的樣子 (準備開始設計！)
+    </div>
+
+    <script>
+        let isFolded = false;
+        let isFlipped = false;
+
+        function toggleFold() {
+            const body = document.body;
+            const foldText = document.getElementById('fold-text');
+            const foldIcon = document.getElementById('fold-icon');
+            const statusText = document.getElementById('status-text');
+
+            if (isFolded) {
+                body.classList.remove('is-folded');
+                foldText.innerText = "折起來檢查！";
+                foldIcon.innerText = "📂";
+                statusText.innerText = isFlipped ? "現在是：內部攤開 (寫內容)" : "現在是：外部攤開 (排版)";
+            } else {
+                if (isFlipped) {
+                    toggleFlip();
+                    setTimeout(() => {
+                        body.classList.add('is-folded');
+                    }, 600);
+                } else {
+                    body.classList.add('is-folded');
+                }
+                
+                foldText.innerText = "把它打開！";
+                foldIcon.innerText = "📖";
+                statusText.innerText = "折好了！你看，封面就在第一頁！";
+            }
+            isFolded = !isFolded;
+        }
+
+        function toggleFlip() {
+            if (isFolded) return;
+
+            const body = document.body;
+            const statusText = document.getElementById('status-text');
+
+            if (isFlipped) {
+                body.classList.remove('is-flipped');
+                statusText.innerText = "現在是：外面 (Outside) - 封面與封底";
+            } else {
+                body.classList.add('is-flipped');
+                statusText.innerText = "現在是：裡面 (Inside) - 介紹學校特色";
+            }
+            isFlipped = !isFlipped;
+        }
+    </script>
+</body>
+</html>
